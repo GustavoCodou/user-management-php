@@ -1,11 +1,25 @@
 <?php
+
+// Aqui vamos utilizar aquele arquivo.
 include 'db.php';
 
-ini_set('display_erros', 1);
+
+// Deixa ativado erros do php para mostrar.
+ini_set('display_errors', 1);
 ini_set('display_startup_erros', 1);
 error_reporting(E_ALL);
 
+
+//Variavel para guardar mensagens de erro
 $error= "";
+
+
+// Isso verifica **como o formulário foi enviado**.
+
+// Se for via `POST`, o código dentro desse `if` será executado.
+// Isso é comum quando se quer processar um formulário só **depois que ele for enviado**
+// evitando executar o código automaticamente ao abrir a página.
+
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
     $username = mysqli_real_escape_string($conn, $_POST['username']);
@@ -16,17 +30,30 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     mysqli_real_escape_string($conn, $_POST['username']);
 }
 
-if($password === $confirm_password){
-    $error = "Password do not match";
-}else {
+    // Check if the password and confirm match
+    if($password === $confirm_password){
+        $error = "Password do not match";
+    }else {
 
-    $sql = "INSERT INTO users (username, password, email) VALUES ('$username', '$password', '$email')";
+    $sql = "SELECT * FROM  users WHERE username='$username' LIMIT 1";
+    $result = mysqli_query($conn, $sql);
 
-    if(mysqli_query($conn, $sql)){
-        echo "DATA INSERTED";
-    }else{
-        echo "SOMETHING HAPPENED not data inserted, error:" . mysqli_error($conn);
+    if(mysqli_num_rows($result) ===1){
+        $error = "Username already exists, Please choose another";
+    } else {
+
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+        $sql = "INSERT INTO users (username, password, email) VALUES ('$username', '$passwordHash', '$email')";
+
+        if(mysqli_query($conn, $sql)){
+            echo "DATA INSERTED";
+        }else{
+            $error= "SOMETHING HAPPENED not data inserted, error:" . mysqli_error($conn);
+        }
+
     }
+
 
 }
 
@@ -42,6 +69,18 @@ if($password === $confirm_password){
     <title>Document</title>
 </head>
 <body>
+
+<h2>Register</h2>
+
+<?php if($error): ?>
+
+<p style="color: red">
+    <?php echo $error; ?>
+</p>
+
+<?php endif; ?>
+
+
     <form method="POST" action="">
 
         <label for="username">Username:</label><br>
@@ -60,3 +99,7 @@ if($password === $confirm_password){
     </form>
 </body>
 </html>
+
+<?php
+mysqli_close($conn);
+?>
