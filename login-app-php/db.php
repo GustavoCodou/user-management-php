@@ -1,18 +1,27 @@
 <?php
 
-// É bom deixar isso em apenas um arquivo para podermoss reutilizar depois.
+$host = "localhost";
+$username = "root";
+$password = "";
+$database = "login_app";
 
-//Essa variavel vai conectar com o banco de dados 
-//Usuário: "root", Senha: "" (vazia), Banco: "login_ap".
-$conn = mysqli_connect("localhost", "root", "", "login_ap");
+$conn = mysqli_connect($host, $username ,$password, $database);
 
-//Deixar em uma variavel para ser mais facil
-if ($conn) {
-    echo "Connected";
+if(!$conn){
+
+    die("Connection failed" . mysqli_connect_error());
+
 } else {
-    // Em caso de erro, exibe a mensagem correspondente
-    echo "Not connected: " . mysqli_connect_error();
+//       echo "Connected";
 }
-?>
 
-?>
+function check_query($result){
+    global $conn;
+    if(!$result){
+        return "Error" . mysqli_error($conn);
+    }
+    return true;
+}
+
+
+
